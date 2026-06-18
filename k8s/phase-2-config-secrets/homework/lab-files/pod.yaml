@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: env-demo
+  namespace: lab-cm
+spec:
+  containers:
+  - name: app
+    image: busybox:1.35
+    command: ['sh', '-c', 'env | sort; echo "---sleeping---"; sleep 3600']
+    env:
+    - name: LOG_LEVEL
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: LOG_LEVEL
+    - name: MAX_CONN
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: MAX_CONNECTIONS
+    - name: ENVIRONMENT
+      valueFrom:
+        configMapKeyRef:
+          name: app-config
+          key: APP_ENV
+    resources:
+      requests:
+        memory: "32Mi"
+        cpu: "50m"
+      limits:
+        memory: "64Mi"
+        cpu: "100m"

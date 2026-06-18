@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: lab-cm
+  labels:
+    app: nginx
+    phase: lab
+data:
+  # Simple values — injected as env vars
+  UPSTREAM_HOST: "backend-svc"
+  UPSTREAM_PORT: "8080"
+  WORKER_PROCESSES: "auto"
+
+  # File content — injected as files via volume mount
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+        
+        location /health {
+            return 200 'OK\n';
+            add_header Content-Type text/plain;
+        }
+        
+        location /api {
+            proxy_pass http://backend-svc:8080;
+            proxy_set_header Host $host;
+        }
+    }
+
+  gzip.conf: |
+    gzip on;
+    gzip_types text/plain application/json;
+    gzip_min_length 1000;
